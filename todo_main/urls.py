@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     
-    path('todo/', include('todo_app.urls')),  # Include URLs from todo_app
+    path('todo/', include('todo_app.urls')),  
 ]

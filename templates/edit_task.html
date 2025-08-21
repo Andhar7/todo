@@ -1,3 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Edit Task - TODO LIST</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
 
-<h1>Edit Task</h1>
+    <style>
+      .form-control {
+        padding: 1rem 0.75rem !important;
+      }
+      .container {
+        max-width: 600px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-12">
+          <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0"><i class="fa fa-pencil"></i> Edit Task</h4>
+            </div>
+            <div class="card-body">
+              <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                  <label for="title" class="form-label">
+                    <strong
+                      >Task Title <span class="text-danger">*</span></strong
+                    >
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="title"
+                    name="title"
+                    value="{{ task.title }}"
+                    required
+                    placeholder="Enter task title"
+                    maxlength="300"
+                  />
+                  <div class="form-text">Maximum 300 characters</div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="description" class="form-label">
+                    <strong>Description (Optional)</strong>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="Enter task description (optional)"
+                  >{{ task.description|default:"" }}</textarea>
+                  <div class="form-text">Add more details about your task</div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <strong>Created:</strong> {{ task.created_at|date:"M d, Y g:i A" }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Last Updated:</strong> {{ task.updated_at|date:"M d, Y g:i A" }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="completed"
+                      {%
+                      if
+                      task.completed
+                      %}checked{%
+                      endif
+                      %}
+                      disabled
+                    />
+                    <label class="form-check-label" for="completed">
+                      Task Status: {% if task.completed %}
+                      <span class="badge bg-success">Completed</span>
+                      {% else %}
+                      <span class="badge bg-warning">Pending</span>
+                      {% endif %}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">
+                    <i class="fa fa-times"></i> Cancel
+                  </a>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Additional Actions -->
+          <div class="card mt-3 shadow-sm">
+            <div class="card-body">
+              <h6 class="card-title">Quick Actions</h6>
+              <div class="btn-group" role="group">
+                {% if not task.completed %}
+                <a
+                  href="{% url 'mark_as_done' task.pk %}"
+                  class="btn btn-success btn-sm"
+                >
+                  <i class="fa fa-check"></i> Mark as Done
+                </a>
+                {% else %}
+                <a
+                  href="{% url 'mark_as_not_done' task.pk %}"
+                  class="btn btn-warning btn-sm"
+                >
+                  <i class="fa fa-undo"></i> Mark as Pending
+                </a>
+                {% endif %}
+                <a
+                  href="{% url 'home' %}"
+                  class="btn btn-outline-primary btn-sm"
+                >
+                  <i class="fa fa-home"></i> Back to Home
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Auto-resize textarea
+      document
+        .getElementById("description")
+        .addEventListener("input", function () {
+          this.style.height = "auto";
+          this.style.height = this.scrollHeight + "px";
+        });
+
+      // Character counter for title
+      const titleInput = document.getElementById("title");
+      const titleCounter = document.createElement("div");
+      titleCounter.className = "form-text text-end";
+      titleInput.parentNode.appendChild(titleCounter);
+
+      function updateCounter() {
+        const remaining = 300 - titleInput.value.length;
+        titleCounter.textContent = `${titleInput.value.length}/300 characters`;
+        titleCounter.className =
+          remaining < 50
+            ? "form-text text-end text-warning"
+            : "form-text text-end";
+      }
+
+      titleInput.addEventListener("input", updateCounter);
+      updateCounter(); // Initialize counter
+    </script>
+  </body>
+</html>

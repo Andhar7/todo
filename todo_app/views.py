@@ -21,9 +21,20 @@ def mark_as_not_done(request, pk):
 
 def edit_task(request, pk):
     task = get_object_or_404(Todo, pk=pk)
+    
     if request.method == 'POST':
-        task.title = request.POST['task']
-        task.description = request.POST.get('description', '')
-        task.save()
-        return redirect('home')
+        title = request.POST.get('title')
+        description = request.POST.get('description', '')
+        
+        if title:
+            task.title = title
+            task.description = description
+            task.save()
+            return redirect('home')
+    
     return render(request, 'edit_task.html', {'task': task})
+
+def delete_task(request, pk):
+    task = get_object_or_404(Todo, pk=pk)
+    task.delete()
+    return redirect('home')
